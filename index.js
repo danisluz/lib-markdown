@@ -1,6 +1,16 @@
 const chalk = require('chalk');
 const fs = require('fs');
 
+function extractLinks(text){
+  const regex = /\[([^\]]*)\]\((https?:\/\/[^\$#\s].[^\s]*)\)/gm;
+  const arrayResults = [];
+  let temp;
+  while((temp = regex.exec(text)) !== null){
+    arrayResults.push({ [temp[1]]: temp[2] });
+  }
+  return arrayResults.length === 0 ? 'there are no links' : arrayResults;
+}
+
 function handleError(error){
   throw new Error(chalk.red(error.code, 'did not find the file'));
 }
@@ -9,28 +19,10 @@ async function getFile(pathFile){
     const encoding = 'utf-8';
     try {
       const data = await fs.promises.readFile(pathFile, encoding);
-      console.log(chalk.green(data));
+      return extractLinks(data);
     } catch(error) {
       handleError(chalk.red(error));
     }
 };
 
-// function getFile(pathFile){
-//   const encoding = 'utf-8';
-//   fs.promises
-//     .readFile(pathFile, encoding)
-//     .then((data) => console.log(data))
-//     .catch((error) => handleError(error));
-// }
-
-// function getFile(pathFile){
-//   const encoding = 'utf-8';
-//   fs.readFile(pathFile, encoding, (error, data) => {
-//     if(error){
-//       handleError(error);
-//     }
-//     console.log(chalk.green(data));
-//   });
-// };
-
-getFile('./files/texto1.md');
+module.exports = getFile;
